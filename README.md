@@ -14,7 +14,7 @@ add this `'vladimir-popov/vim-navigator'` to your `.vimrc` and run `:PlugInstall
 
 - `:NavigatorShow` - to show a contents of the current buffer (`<F12>` by default).
 - `:NavigatorClose` - to close the contents and return back to the
-buffer(`<ESC>` by default).
+buffer(`<F12>` by default).
 
 ## Key mapping
 
