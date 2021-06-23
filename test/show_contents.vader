@@ -1,0 +1,17 @@
+Given vim (Buffer with a simple vimscript):
+  function A()
+    function B()
+    " initially the cursor is on this line
+    endfunction
+  endfunction  
+
+Do(Put cursor on the initial line and show the contents):
+  /cursor\<Enter>
+  :NavigatorShow\<Enter>
+
+Expect(Contents of the vimscript):
+    function A()
+      function B()
+
+Then(Cursor must be on the line with a name of the inner function):      
+  AssertEqual '    function B()', getline('.')

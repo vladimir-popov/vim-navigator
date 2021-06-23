@@ -1,0 +1,15 @@
+Given(Dirty buffer):
+  A previously rendered content
+
+Execute(Render a contents):
+  call navigator#render#Render([
+      \ { 'line': 1, 'fold': 0, 'text': ' Title ' },
+      \ { 'line': 2, 'fold': 0 },
+      \ { 'line': 3, 'fold': 1, 'text': '  Subtitle   ' },
+      \ ], function('trim'))
+  call append('$', '----')  
+
+Expect(Contents):
+  Title
+    Subtitle
+  ----

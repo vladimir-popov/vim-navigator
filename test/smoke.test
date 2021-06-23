@@ -1,0 +1,50 @@
+**************************************************
+*   This is a script to test a logic of shownig  *
+*   the Contents and going to selected section.  *
+**************************************************
+
+" I don't understand when and why the Vader 
+" changes the current buffer in case of Do or 
+" Then blocks. So, in this script the Given 
+" content is copied to the new buffer 'Main'
+" which explicitly become the current buffer.
+
+Execute:
+  Log 'Prepare the given buffer'
+  const file_type = &filetype
+  let content = getbufline('%', 1, '$')
+  let main_bid = bufadd('Main')
+  execute 'buffer ' .. main_bid
+  call append(0, content)
+  execute ':$d'
+  execute ':set filetype=' .. g:file_type
+  AssertEqual main_bid, bufnr('%')
+  
+  if exists('g:init_line')
+    Log 'Put cursor on the line ' .. g:init_line
+    execute g:init_line
+  endif
+  Log 'Open the Contents'
+  execute ':NavigatorShow'
+  AssertEqual b:navigator.contents.bid, bufnr('%')
+
+  " Here we can check the position of the cursor 
+  " in the contents
+  if exists('g:selected_contents_line')
+    Log 'Cursor should be on the line ' .. g:selected_contents_line
+    AssertEqual g:selected_contents_line, line('.')
+  endif  
+
+  " Let's check that cursor will be placed on the correct line
+  " after "Goto" from the contents
+  if exists('g:from_contents_line') && exists('g:final_line')
+    Log 'Go to the line ' .. getline(g:from_contents_line)
+    execute g:from_contents_line
+    call navigator#contents#Goto()
+    AssertEqual b:navigator.buffer.id, bufnr('%')
+    AssertEqual g:final_line, line('.')
+  endif  
+
+  " Show the contents to be able to compare it with Expect block
+  execute ':NavigatorShow'
+
