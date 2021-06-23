@@ -31,7 +31,7 @@
 " Keymap to show the contents of the current buffer
 call navigator#utils#DefaultValue('g:navigator_show_nmap', '<f12>')
 " Keymap to close the contents
-call navigator#utils#DefaultValue('g:navigator_close_nmap', '<esc>')
+call navigator#utils#DefaultValue('g:navigator_close_nmap', '<f12>')
 " Keymap to go to the selected section
 call navigator#utils#DefaultValue('g:navigator_goto_nmap', '<cr>')
 " Size of tabulation in the Contents

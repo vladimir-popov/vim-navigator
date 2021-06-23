@@ -8,7 +8,7 @@ used to build the contents is used for folding.
 ## Installation 
 
 To install this plugin with the [Plug](https://github.com/junegunn/vim-plug),
-add this `'dokwork/vim-navigator'` to your `.vimrc` and run `:PlugInstall`.
+add this `'vladimir-popov/vim-navigator'` to your `.vimrc` and run `:PlugInstall`.
 
 ## Commands:
 
@@ -19,7 +19,7 @@ buffer(`<ESC>` by default).
 ## Key mapping
 
 By default, you can show a contents by pressing `<F12>` and close it by
-pressing `<ESC>`. To go to selected section the `<ENTER>` is used. But you
+pressing the same key. To go to selected section the `<ENTER>` is used. But you
 can change key mapping just set the variables:
 
 ```vimscript
@@ -27,7 +27,7 @@ can change key mapping just set the variables:
 let g:navigator_show_nmap='<f12>'
 
 " Keymap to close the contents:
-g:navigator_close_nmap='<esc>'
+g:navigator_close_nmap='<f12>'
 
 " Keymap to go to the selected section
 g:navigator_goto_nmap='<cr>'
