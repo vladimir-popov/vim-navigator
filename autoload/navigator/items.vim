@@ -11,18 +11,22 @@
 " ==========================================================
 
 function! navigator#items#Build(navigator) abort
-  let IsStart = s:GetFunction(a:navigator, 'Start')
+  let IsStart = s:GetFunction(a:navigator, 'start')
 
-  if has_key(a:navigator, 'isSectionEnd')
-    let IsEnd = s:GetFunction(a:navigator, 'End')
+  if has_key(a:navigator, 'endOfSection')
+    let IsEnd = s:GetFunction(a:navigator, 'end')
     return s:BuildByStartEnd(IsStart, IsEnd)
+  elseif has_key(a:navigator, 'sectionFoldLevel')
+    let Fold = { i -> a:navigator.sectionFoldLevel(getline(i)) }
+    return s:BuildWithCustomFold(IsStart, Fold)
   else
-    const indent = has_key(a:navigator, 'indentation') 
+    const ind = has_key(a:navigator, 'indentation') 
           \ ? a:navigator.indentation 
           \ : exists('shiftwidth')
           \ ? &shiftwidth
           \ : 2
-    return s:BuildByIndent(IsStart, indent)
+    let Fold = { i -> 1 + indent(i) / ind }
+    return s:BuildWithCustomFold(IsStart, Fold)
   endif  
 endfunction
 
@@ -50,14 +54,12 @@ function! navigator#items#GetItem(items, lnum)
   endif
 endfunction
 
-function! s:BuildByIndent(sectionStart, indent) abort
+function! s:BuildWithCustomFold(sectionStart, fold) abort
   let items = []
-
   for i in range(1, line('$'))
-    let cur = getline(i)
-    if a:sectionStart(cur)
-      let current_fold = 1 + indent(i) / a:indent
-      let item = s:NewItem(i, current_fold, cur)
+    let curline = getline(i)
+    if a:sectionStart(curline)
+      let item = s:NewItem(i, a:fold(i), curline)
       call add(items, item)
     endif  
   endfor
@@ -101,11 +103,12 @@ endfunction
 " or global scope.
 " If the function is not found the exception will be thrown.
 function! s:GetFunction(navigator, funsuf)
-  if has_key(a:navigator, 'isSection' .. a:funsuf)
-    return a:navigator['isSection' .. a:funsuf]
+  let functionName = (a:funsuf ==? 'start') ? 'beginningOfSection' : 'endOfSection'
+  if has_key(a:navigator, functionName)
+    return a:navigator[functionName]
   else
     throw 'Function to find the ' .. a:funsuf .. ' of a section was not found.'
-          \ .. ' You can set it to the navigator object directly with the name "isSection' 
-          \ .. a:funsuf .. '".'
+          \ .. ' You can set it to the navigator object directly with the name ' 
+          \ .. '"' .. functionName .. '".'
   endif
 endfunction

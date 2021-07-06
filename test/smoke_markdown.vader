@@ -1,0 +1,19 @@
+Execute:
+  const g:init_line = 4
+  const g:selected_contents_line = 2
+  const g:from_contents_line = 3
+  const g:final_line = 5
+
+Given markdown (Buffer with a simple markdown):
+  # Title
+  text
+   ## Subtitle ##
+  initial line
+  ### Subtitle 3 
+
+Include: smoke.test
+
+Expect:
+    # Title
+      ## Subtitle ##
+        ### Subtitle 3

@@ -10,8 +10,8 @@ Given vim (Vimscript as an example):
     
 Execute(Check the getting fold level):
   let navigator = g:NavigatorNew()
-  let navigator.isSectionStart = { str -> str =~# '\v^\s*fun' }
-  let navigator.isSectionEnd = { str -> str =~# '\v^\s*endfunction' }
+  let navigator.beginningOfSection = { str -> str =~# '\v^\s*fun' }
+  let navigator.endOfSection = { str -> str =~# '\v^\s*endfunction' }
 
   let expectations = [
   \   { 'line': 1, 'foldlevel': 0 },
@@ -37,7 +37,7 @@ Given(Yaml as an example):
 
 Execute(Check the getting fold level):
   let navigator = g:NavigatorNew()
-  let navigator.isSectionStart = { str -> str =~# '\v^\s*\w+:' }
+  let navigator.beginningOfSection = { str -> str =~# '\v^\s*\w+:' }
   let navigator.indentation = 2
 
   let expectations = [
