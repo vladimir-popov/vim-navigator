@@ -5,9 +5,11 @@
 " Checks is {varname} already exists. If no, it creates
 " new variable {varname} with value {value}.
 function! navigator#utils#DefaultValue(varname, value)
-  let expr = printf("let %s = exists('%s') ? %s : '%s'", 
-        \ a:varname, a:varname, a:varname, a:value)
-  execute expr
+  if (exists(a:varname))
+    return
+  endif
+  let v = (type(a:value) == v:t_string) ? "'" .. a:value .. "'" : a:value
+  execute printf("let %s = %s", a:varname, v)
 endfunction  
 
 " Maps keys {keys} to {cmd} in the mode {mode}.

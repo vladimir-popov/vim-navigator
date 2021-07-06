@@ -3,6 +3,24 @@
 *   the Contents and going to selected section.  *
 **************************************************
 
+" This script can be parametrized by follow global 
+" int variables:      
+"
+"   g:init_line - a number of line with cursor in the
+"                 initial buffer;
+"
+"   g:selected_contents_line - a number of the line
+"   where cursor should be after when the contents 
+"   will bee openned;
+"
+"   g:from_contents_line - a number of line in the 
+"   contents from which we go back to the initial
+"   buffer;
+" 
+"   g:final_line - a number of line in the initial 
+"   buffer where the cursor should finaly be.
+
+
 " I don't understand when and why the Vader 
 " changes the current buffer in case of Do or 
 " Then blocks. So, in this script the Given 

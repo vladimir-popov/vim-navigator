@@ -1,0 +1,16 @@
+Execute(should set a value):
+  call navigator#utils#DefaultValue("g:test", 1)
+  AssertEqual 1, g:test
+
+Execute(should not override value):
+  let g:test = 2
+  call navigator#utils#DefaultValue("g:test", -1)
+  AssertEqual 2, g:test
+
+Execute(should set a string value):
+  call navigator#utils#DefaultValue("g:str", 'value')
+  AssertEqual 'value', g:str
+
+Execute(should set a dictionary):
+  call navigator#utils#DefaultValue("g:dict", { test: 1 })
+  AssertEqual { test: 1 }, g:dict

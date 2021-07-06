@@ -35,7 +35,9 @@ call navigator#utils#DefaultValue('g:navigator_close_nmap', '<f12>')
 " Keymap to go to the selected section
 call navigator#utils#DefaultValue('g:navigator_goto_nmap', '<cr>')
 " Size of tabulation in the Contents
-call navigator#utils#DefaultValue('g:navigator_tab_size', 2)
+call navigator#utils#DefaultValue('g:navigator_padding_size', 2)
+" Where the buffer with contents should be opened 
+call navigator#utils#DefaultValue('g:navigator_open_mode', 'r')
 
 
 " ==========================================================
@@ -134,6 +136,22 @@ function! g:NavigatorNew()
     let item = self.getItem(a:lnum)
     return (has_key(item, 'fold')) ? item.fold : 0
   endfunction  
+
+  " Possible values:
+  "   b - deafult; Contents is apeare in the same window 
+  "   l - to show in the new window on the left; 
+  "   r - to show in the new window on the right;
+  function navigator.mode()
+    if (!exists('g:navigator_open_mode'))
+      return 'b'
+    else
+      return (g:navigator_open_mode ==# 'r') ? 'r' : 'b'
+    endif
+  endfunction
+
+  function navigator.settings()
+    return { 'padding': g:navigator_padding_size }
+  endfunction
 
   return navigator
 endfunction  

@@ -15,6 +15,7 @@ function! navigator#contents#Show(navigator) abort
   call a:navigator.update()
   let item = a:navigator.getItem(line('.'))
   call s:CreateBuffer(a:navigator)
+  " getting a function to apply a custom format of a section title 
   let Format = (has_key(a:navigator, 'formatText'))
         \ ? a:navigator.formatText
         \ : { s -> s }
@@ -55,8 +56,14 @@ function! navigator#contents#Close(navigator)
   if !navigator#contents#IsContentsShown(a:navigator)
     return 0
   endif
-  " open original buffer
-  execute 'buffer ' .. a:navigator.buffer.id
+  if (a:navigator.mode() == 'b')
+    " open original buffer
+    execute 'buffer ' .. a:navigator.buffer.id
+  else " if (a:navigator.mode() == 'r')
+    " move focus back
+    " execute 'wincmd h'
+    call win_gotoid(bufwinid(a:navigator.buffer.name))
+  endif
 
   " close the buffer with a contents.
   execute 'silent!  bwipeout ' .. a:navigator.contents.buffer
@@ -88,7 +95,11 @@ function! s:CreateBuffer(navigator) abort
   let a:navigator.contents.buffer = 
         \ 'contents_of_' .. a:navigator.buffer.name 
   let a:navigator.contents.bid = bufadd(a:navigator.contents.buffer)
-  execute 'silent buffer! ' .. a:navigator.contents.bid
+  if (a:navigator.mode() == 'r')
+    execute 'silent! botright vsplit ' .. a:navigator.contents.buffer
+  else
+    execute 'silent buffer! ' .. a:navigator.contents.bid
+  endif
 
   " configurations of the new buffer:
   setlocal buftype=nofile bufhidden=hide nospell nowrap 

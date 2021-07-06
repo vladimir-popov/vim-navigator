@@ -25,6 +25,6 @@ function! navigator#render#Render(items, format) abort
 endfunction
 
 functio! s:CreateLine(item, format)
-  const space_count = g:navigator_tab_size * a:item.fold
+  const space_count = g:navigator_padding_size * a:item.fold
   return repeat(' ', space_count) .. a:format(trim(a:item.text))
 endfunction
