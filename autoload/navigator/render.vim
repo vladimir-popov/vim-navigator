@@ -6,7 +6,7 @@
 " Renders a contents by the {items} from the beginning 
 " of the current buffer. Returns a list of rendered items.
 " Function {format} with type of { str -> str } is used to
-" format a text of an  item.
+" preformat a text of an  item.
 function! navigator#render#Render(items, format) abort
   execute ':1,$d'
   let lnum=0

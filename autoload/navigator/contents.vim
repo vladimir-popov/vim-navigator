@@ -16,8 +16,8 @@ function! navigator#contents#Show(navigator) abort
   let item = a:navigator.getItem(line('.'))
   call s:CreateBuffer(a:navigator)
   " getting a function to apply a custom format of a section title 
-  let Format = (has_key(a:navigator, 'formatText'))
-        \ ? a:navigator.formatText
+  let Format = (has_key(a:navigator, 'formatSectionName'))
+        \ ? a:navigator.formatSectionName
         \ : { s -> s }
   let a:navigator.contents.items = navigator#render#Render(
         \     a:navigator.items(),

@@ -5,7 +5,7 @@ function! NavigatorYaml()
   if !exists('b:navigator') 
     let b:navigator = g:NavigatorNew()
     let b:navigator.beginningOfSection = { str -> str =~# '\v^\s*(-|_|\w)+:' }
-    let b:navigator.formatText = { str -> split(trim(str), ':')[0] } 
+    let b:navigator.formatSectionName = { str -> split(trim(str), ':')[0] } 
   endif
 
   return b:navigator

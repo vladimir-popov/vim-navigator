@@ -16,8 +16,8 @@ function! navigator#items#Build(navigator) abort
   if has_key(a:navigator, 'endOfSection')
     let IsEnd = s:GetFunction(a:navigator, 'end')
     return s:BuildByStartEnd(IsStart, IsEnd)
-  elseif has_key(a:navigator, 'sectionFoldLevel')
-    let Fold = { i -> a:navigator.sectionFoldLevel(getline(i)) }
+  elseif has_key(a:navigator, 'sectionLevel')
+    let Fold = { i -> a:navigator.sectionLevel(getline(i)) }
     return s:BuildWithCustomFold(IsStart, Fold)
   else
     const ind = has_key(a:navigator, 'indentation') 
