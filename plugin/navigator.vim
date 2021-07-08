@@ -46,6 +46,7 @@ call navigator#utils#DefaultValue('g:navigator_open_mode', 'r')
 
 command! NavigatorShow :echo g:NavigatorShow()
 command! NavigatorClose :call g:NavigatorClose()
+command! NavigatorGoto :call navigator#contents#Goto()
 
 call navigator#utils#Keymap(g:navigator_show_nmap, 'n', ':NavigatorShow<cr>')
 
