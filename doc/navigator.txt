@@ -1,0 +1,47 @@
+*navigator.txt* plugin to help navigate through the current buffer.
+
+  Author: Vladimir Popov <vladimir@dokwork.ru>
+
+================================================================================
+
+
+================================================================================
+1. Usage                                               
+                                                                *NavigatorUsage*
+
+The mains goalr of this plugin is to help you to navigate around the buffer.
+When the navigator for the current type of buffer exists, you can open the
+buffer's contents  to go through it faster. Also, the same logic which is used
+to build the contents can be used for folding.
+
+To open a contents use: >
+  :NavigatorShow
+
+To close it: >
+  :NavigatorClose
+
+When you'll have opened the Contents of the current buffer, your cursor will be
+on the line with a title of the section where you were before opened the
+Contents.  Use default keys to navigate around the Contents. You can jump to
+selected section by press <Enter>.
+
+================================================================================
+2. Configuration
+                                                        *NavigatorConfiguration*
+
+The Navigator plugin tries to be as configurable as it's possible. Let's begin
+from the |NavigatorMapping|.
+
+--------------------------------------------------------------------------------
+2.1. Mapping
+                                                              *NavigatorMapping*
+
+To set your custom hotkeys you can set them to the special global variables.
+First, you can specify keys to show and close the contents (`F12` is used by
+default): >
+  let g:navigator_show_nmap='<f12>'
+  let g:navigator_close_nmap='<f12>'
+  
+Then you can change a key to go to selected section by setting the variable: >
+  let g:navigator_goto_nmap='<cr>'
+

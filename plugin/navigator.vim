@@ -46,7 +46,6 @@ call navigator#utils#DefaultValue('g:navigator_open_mode', 'r')
 
 command! NavigatorShow :echo g:NavigatorShow()
 command! NavigatorClose :call g:NavigatorClose()
-command! NavigatorGoto :call navigator#contents#Goto()
 
 call navigator#utils#Keymap(g:navigator_show_nmap, 'n', ':NavigatorShow<cr>')
 
@@ -106,7 +105,7 @@ function! g:NavigatorNew()
   "   - 'line' is a number of the line in the buffer;
   "   - 'fold' is a fold level on the 'line';
   "   - 'title' is an optional title of the 'line'.
-  "     Usualy it means that its 'line' is a header.
+  "      Defined title means that its 'line' is a header.
   function navigator.items() abort
     if has_key(self, '__items')
       return self.__items 

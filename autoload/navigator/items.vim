@@ -1,6 +1,6 @@
 " ==========================================================
-" This script builds a list of the current buffer which will
-" be used to build a contents of the buffer.
+" This script builds a list of items the current buffer 
+" which will be used to build a contents of the buffer.
 "
 " The list of items contains dictionaries such as: >
 "   { 

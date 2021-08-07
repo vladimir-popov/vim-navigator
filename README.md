@@ -17,8 +17,6 @@ add this `'vladimir-popov/vim-navigator'` to your `.vimrc` and run
   default).
 - `:NavigatorClose` - to close the contents and return back to the
   buffer(`<F12>` by default).
-- `:NavigatorGoto` - to go to the beginning of the selected section (`<Enter>`
-  by default).
 
 ## Key mapping
 
