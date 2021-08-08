@@ -7,12 +7,47 @@
 "     fold: <fold level of the line>,
 "     title: <string with a name of the section in the contents>
 "   }
+" Items has a sorted list of items to help render them,
+" and IntervalTree to find nearest to line item faster: >
+"   {
+"     'list': []
+"     'tree': navigator#tree#interval#New()
+"     'get': { lnum -> item }
+"   }
 " ==========================================================
+function! navigator#items#Build(navigator) abort
+  let items = {}
+
+  function items.get(lnum)
+    if has_key(self, 'tree')
+      return self.tree.get(a:lnum)
+    else 
+      return {}
+    endif
+  endfunction
+
+
+  let items.list = s:BuildList(a:navigator)
+  if empty(items.list)
+    return items
+  endif
+
+  let middle = len(items.list) / 2
+  let items.tree = navigator#tree#interval#New(items.list[middle])
+
+  for i in range(len(items.list))
+    if i != middle
+      call items.tree.add(items.list[i])
+    endif
+  endfor
+
+  return items
+endfunction
 
 " If {items} has an item which include the specified line
 " {lnum} then return it If no one item will be found the
 " empty dict will be returned.
-function! navigator#items#GetItem(items, lnum)
+function! s:GetItem(items, lnum)
   let size = len(a:items)
   let middle = size / 2
   let item = a:items[middle]
@@ -36,7 +71,7 @@ endfunction
 
 " Creates list of items of current buffer according to the 
 " {navigator}.
-function! navigator#items#Build(navigator) abort
+function! s:BuildList(navigator) abort
   const IsStart = s:GetFunction(a:navigator, 'beginningOfSection')
 
   let items = []

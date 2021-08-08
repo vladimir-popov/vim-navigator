@@ -111,7 +111,7 @@ function! g:NavigatorNew()
       return self.__items 
     else
       let self.__items = navigator#items#Build(self)
-      return self.__items
+      return self.__items.list
     endif
   endfunction
 
@@ -127,7 +127,8 @@ function! g:NavigatorNew()
   endfunction  
 
   function navigator.getItem(lnum)
-    return navigator#items#GetItem(self.items(), a:lnum)
+    call self.items()
+    return self.__items.get(a:lnum)
   endfunction
 
   " Returns {foldlevel} of the line {lnum}
