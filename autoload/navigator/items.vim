@@ -1,114 +1,115 @@
 " ==========================================================
-" This script builds a list of items the current buffer 
-" which will be used to build a contents of the buffer.
-"
-" The list of items contains dictionaries such as: >
+" This script is about items of the navigator.
+" The item is a dictionary such as: >
 "   { 
-"     line: <number of line>, 
-"     fold: <fold level of the {line}>,
-"     title: <optional string with a name of the section in the contents>
+"     begin: <number of the first line in the section>, 
+"     end: <number of the last line in the section>,
+"     fold: <fold level of the line>,
+"     title: <string with a name of the section in the contents>
 "   }
 " ==========================================================
 
-function! navigator#items#Build(navigator) abort
-  let IsStart = s:GetFunction(a:navigator, 'start')
-
-  if has_key(a:navigator, 'endOfSection')
-    let IsEnd = s:GetFunction(a:navigator, 'end')
-    return s:BuildByStartEnd(IsStart, IsEnd)
-  elseif has_key(a:navigator, 'sectionLevel')
-    let Fold = { i -> a:navigator.sectionLevel(getline(i)) }
-    return s:BuildWithCustomFold(IsStart, Fold)
-  else
-    const ind = has_key(a:navigator, 'indentation') 
-          \ ? a:navigator.indentation 
-          \ : exists('shiftwidth')
-          \ ? &shiftwidth
-          \ : 2
-    let Fold = { i -> 1 + indent(i) / ind }
-    return s:BuildWithCustomFold(IsStart, Fold)
-  endif  
-endfunction
-
-" If {items} has an item on the specified line {lnum}
-" then return it else the nearest item with low line
-" number will be returned. If no one item will be found
-" the empty dict will be returned.
+" If {items} has an item which include the specified line
+" {lnum} then return it If no one item will be found the
+" empty dict will be returned.
 function! navigator#items#GetItem(items, lnum)
   let size = len(a:items)
   let middle = size / 2
-  let line = a:items[middle].line
+  let item = a:items[middle]
 
   if size == 1
-    return (line <= a:lnum) 
-          \ ? a:items[0] 
-          \ : {}
+    return s:Include(item, a:lnum) ? item : {}
   endif
 
-  if line > a:lnum
+  if item.begin > a:lnum
     return navigator#items#GetItem(a:items[:middle-1], a:lnum)
-  elseif line < a:lnum
+  elseif item.begin < a:lnum
     return navigator#items#GetItem(a:items[middle:], a:lnum)
   else
     return a:items[middle] 
   endif
 endfunction
 
-function! s:BuildWithCustomFold(sectionStart, fold) abort
-  let items = []
-  for i in range(1, line('$'))
-    let curline = getline(i)
-    if a:sectionStart(curline)
-      let item = s:NewItem(i, a:fold(i), curline)
-      call add(items, item)
-    endif  
-  endfor
-
-  return items
+function! s:Include(item, lnum)
+  return ( a:item.begin <= a:lnum ) && (a:lnum <= a:item.end)
 endfunction
 
-function! s:BuildByStartEnd(sectionStart, sectionEnd) abort
+" Creates list of items of current buffer according to the 
+" {navigator}.
+function! navigator#items#Build(navigator) abort
+  const IsStart = s:GetFunction(a:navigator, 'beginningOfSection')
+
   let items = []
-  let current_fold = 0
-
-  for i in range(1, line('$'))
-    let cur = getline(i)
-    let prev = getline(i-1)
-
-    if a:sectionStart(cur)
-      let current_fold += 1
-      let item = s:NewItem(i, current_fold, cur)
+  let fold = 0
+  for lnum in range(1, line('$'))
+    if IsStart(lnum)
+      let title = s:GetTitle(a:navigator, lnum)
+      let fold = s:GetFold(a:navigator, lnum, fold) 
+      let item = { 'begin':  lnum, 'fold': fold, 'title': title }
       call add(items, item)
-    endif 
-
-    if a:sectionEnd(prev)
-      let current_fold -= 1
-      let item = s:NewItem(i, current_fold)
-      call add(items, item)
+    endif
+    if s:IsEnd(a:navigator, lnum)
+      let item = s:NotFinishedItem(items)
+      let item.end = lnum 
+      let fold -= 1
     endif
   endfor
 
   return items
 endfunction
 
-function s:NewItem(line, fold, ...) 
-  let item = { 'line':  a:line, 'fold': a:fold }
-  if a:0 > 0 
-    let item.text = a:1
-  endif
-  return item
-endfunction    
+function! s:GetTitle(navigator, lnum)
+  if has_key(a:navigator, 'sectionTitle')
+    return a:navigator.sectionTitle(a:lnum)
+  else 
+    return getline(a:lnum)
+  endif 
+endfunction
 
-" Tries to find a function inside the {navigator}
-" or global scope.
-" If the function is not found the exception will be thrown.
-function! s:GetFunction(navigator, funsuf)
-  let functionName = (a:funsuf ==? 'start') ? 'beginningOfSection' : 'endOfSection'
-  if has_key(a:navigator, functionName)
-    return a:navigator[functionName]
+function! s:GetFold(navigator, lnum, curfold)
+  if has_key(a:navigator, 'sectionLevel')
+    return a:navigator.sectionLevel(a:lnum)
+  elseif has_key(a:navigator, 'endOfSection') 
+    return a:curfold + 1
   else
-    throw 'Function to find the ' .. a:funsuf .. ' of a section was not found.'
-          \ .. ' You can set it to the navigator object directly with the name ' 
-          \ .. '"' .. functionName .. '".'
+    const ind = has_key(a:navigator, 'indentation') 
+          \ ? a:navigator.indentation 
+          \ : exists('shiftwidth')
+          \ ? &shiftwidth
+          \ : 2
+    return 1 + indent(a:lnum) / ind
   endif
+endfunction
+
+function! s:IsEnd(navigator, lnum)
+    return has_key(a:navigator, 'endOfSection') 
+          \ && a:navigator.endOfSection(a:lnum)
+endfunction 
+
+function! s:NotFinishedItem(items) 
+  for i in range(len(a:items) - 1, 0, -1)
+    if !has_key(a:items[i], 'end')
+      return a:items[i]
+    endif
+  endfor
+
+  return {}
+endfunction
+
+" Tries to find a function inside the {navigator}.
+" If the function is not found the exception will be thrown.
+function! s:GetFunction(navigator, functionName) abort
+  if has_key(a:navigator, a:functionName)
+    let Func = a:navigator[a:functionName]
+    if type(Func) == v:t_func
+      return Func
+    endif
+
+    throw 'Property navigator.' .. a:functionName .. ' must be a function.'
+      \ .. ' But it has type ' .. type(Func) .. '. See :help type'
+  endif
+
+  throw 'Function ' .. a:functionName .. ' was not found.'
+        \ .. ' Please, set it to the navigator for ' 
+        \ .. a:navigator.buffer.name 
 endfunction
