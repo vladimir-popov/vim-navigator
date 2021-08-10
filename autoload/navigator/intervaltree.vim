@@ -16,6 +16,9 @@ function! navigator#intervaltree#FromList(intervals) abort
 endfunction
 
 function! navigator#intervaltree#New(root) abort
+  if !(has_key(a:root, 'begin') && has_key(a:root, 'end'))
+    throw 'Illegal interval: ' .. string(a:root)
+  endif
 
   let tree = { 
         \ 'intervals': [a:root],

@@ -79,22 +79,27 @@ function! s:BuildSectionsList(parser) abort
     if !empty(newSection)
       let title = s:GetTitle(newSection, lnum)
       let fold = s:GetFold(newSection, lnum, fold) 
-      let section = { 
+      let us = { 
             \ 'begin':  lnum, 
             \ 'fold': fold, 
             \ 'title': title, 
             \ 'type': newSection.type 
             \ }
-      call add(sections, section)
-      call add(unfinished_sections, { 'description': newSection, 'section': section })
+      call add(sections, us)
+      call add(unfinished_sections, { 'description': newSection, 'section': us })
     endif
+
     if !empty(unfinished_sections) 
           \ && unfinished_sections[-1].description.End(lnum)
-      let section = unfinished_sections[-1].section
-      let section.end = lnum 
+      let us = unfinished_sections[-1].section
+      let us.end = lnum 
       let fold -= 1
       call remove(unfinished_sections, -1)
     endif
+  endfor
+
+  for us in unfinished_sections 
+    let us.section.end = line('$')
   endfor
 
   return sections
