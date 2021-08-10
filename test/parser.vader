@@ -1,0 +1,53 @@
+Given(VimScript like buffer):
+  -- content --     1  0
+  start             2  1
+    -- content --   3  1
+    start           4  2
+      -- content -- 5  2
+    end             6  2
+    start           7  2
+    end             8  2
+    -- content --   9  1
+  end               10 1
+  -- content --     11 0
+
+Execute(Validate items):
+  let parser = navigator#parser#New()
+  let parser.example = {
+    \   'Begin': { i -> getline(i) =~# 'start' },
+    \   'End': { i -> getline(i) =~# 'end' },
+    \   'Title': { i -> 'title' }
+    \ }
+
+  let expectedSections = [
+    \ {'begin': 2, 'end': 10, 'fold': 1, 'title': 'title', 'type': 'example' },
+    \ {'begin': 4, 'end': 6, 'fold': 2, 'title': 'title', 'type': 'example' },
+    \ {'begin': 7, 'end': 8, 'fold': 2, 'title': 'title', 'type': 'example' },
+    \ ]
+
+  AssertEqual expectedSections, parser.parse().list
+
+Given(Markdown buffer):
+  -- content --    1 0
+  # Title 1        2 1
+  -- content --    3 1
+                   4 1
+  ## Subtitle      5 2
+  -- content --    7 2
+                   8 2
+  -- content --    9 2
+
+Execute(Validate items):
+  let parser = navigator#parser#New()
+  let parser.example = {
+    \   'Begin': { i -> getline(i) =~# '\v^\s*\#+' },
+    \   'Fold': { lnum -> len(matchstr(getline(lnum), '\v\#+', 0, 1)) },
+    \   'Title': { i -> 'title' }
+    \ }
+
+  let expectedItems = [
+    \ { 'begin': 2, 'end': 4, 'fold': 1, 'title': 'title', 'type': 'example' },
+    \ { 'begin': 5, 'end': 9, 'fold': 2, 'title': 'title', 'type': 'example' },
+    \ ]
+
+  AssertEqual expectedItems, parser.parse().list

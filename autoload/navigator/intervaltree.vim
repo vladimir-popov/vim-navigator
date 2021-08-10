@@ -1,8 +1,21 @@
-  " see https://en.wikipedia.org/wiki/Interval_tree
-  "
-  " let interval = { 'begin': number, 'end': number }
-  " let tree = { 'left': tree, 'right': tree, 'middle': number, 'intervals': [interval] }
-function! g:navigator#tree#interval#New(root) abort
+" see https://en.wikipedia.org/wiki/Interval_tree
+"
+" let interval = { 'begin': number, 'end': number }
+" let tree = { 'left': tree, 'right': tree, 'middle': number, 'intervals': [interval] }
+function! navigator#intervaltree#FromList(intervals) abort 
+  let middle = len(a:intervals) / 2
+  let tree = navigator#intervaltree#New(a:intervals[middle])
+
+  for i in range(len(a:intervals))
+    if i != middle
+      call tree.add(a:intervals[i])
+    endif
+  endfor
+
+  return tree
+endfunction
+
+function! navigator#intervaltree#New(root) abort
 
   let tree = { 
         \ 'intervals': [a:root],
@@ -55,7 +68,7 @@ function! s:AddRight(tree, interval)
   if has_key(a:tree, 'right')
     return a:tree.right.add(a:interval)
   else
-    let a:tree.right = navigator#tree#interval#New(a:interval)
+    let a:tree.right = navigator#intervaltree#New(a:interval)
     return a:tree
   endif
 endfunction
@@ -64,7 +77,7 @@ function! s:AddLeft(tree, interval)
   if has_key(a:tree, 'left')
     return a:tree.left.add(a:interval)
   else
-    let a:tree.left = navigator#tree#interval#New(a:interval)
+    let a:tree.left = navigator#intervaltree#New(a:interval)
     return a:tree
   endif
 endfunction

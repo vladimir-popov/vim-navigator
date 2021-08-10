@@ -1,4 +1,4 @@
-Given(VimL buffer):
+Given(Example of a content):
   -- content --     1  0
   start             2  1
     -- content --   3  1
@@ -10,20 +10,6 @@ Given(VimL buffer):
     -- content --   9  1
   end               10 1
   -- content --     11 0
-
-Execute(Validate items):
-  let navigator = g:NavigatorNew()
-  let navigator.beginningOfSection = { i -> getline(i) =~# 'start' }
-  let navigator.endOfSection = { i -> getline(i) =~# 'end' }
-  let navigator.sectionTitle = { i -> 'title' }
-
-  let expectedItems = [
-    \ {'begin': 2, 'end': 10, 'fold': 1, 'title': 'title'},
-    \ {'begin': 4, 'end': 6, 'fold': 2, 'title': 'title'},
-    \ {'begin': 7, 'end': 8, 'fold': 2, 'title': 'title'},
-    \ ]
-
-  AssertEqual expectedItems, navigator.items()
 
 Execute(Validate folds):
   for i in range(1, line('$'))

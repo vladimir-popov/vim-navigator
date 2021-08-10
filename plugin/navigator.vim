@@ -90,51 +90,54 @@ function! g:NavigatorReset()
 endfunction  
 
 " Constructor of the {navigator}
-function! g:NavigatorNew()
+function! g:NavigatorNew(parser)
+  " '__sections' is a list of setions from the buffer;
+  " 'sections' is a dictionary of section tpye -> CONSTRUCTOR 
+  " of the sections in the buffer;
   let navigator = { 
         \  'buffer': { 
         \     'id': bufnr('%'), 
         \     'name':  bufname('%') 
         \   },
-        \   'formatTitle': { s -> s }
+        \   'parser': a:parser
         \ }
 
-  " Lazy getter of the items - a list of dictionaries such as:
-  " { 'line': <number>, 'fold': <number>[, 'title': <string>] }
+  " Lazy getter of the sections - a list of dictionaries such as:
+  " { 'begin': <number>, 'end': <number>, 'fold': <number>, 'title': <string> }
   " where:
-  "   - 'line' is a number of the line in the buffer;
-  "   - 'fold' is a fold level on the 'line';
-  "   - 'title' is an optional title of the 'line'.
-  "      Defined title means that its 'line' is a header.
-  function navigator.items() abort
-    if has_key(self, '__items')
-      return self.__items 
+  "   - 'begin' is a number of the first line of the section in the buffer;
+  "   - 'end' is a number of the last line of the section in the buffer;
+  "   - 'fold' is a fold level on the section;
+  "   - 'title' is an title of the section.
+  function navigator.listOfSections() abort
+    if has_key(self, '__sections')
+      return self.__sections.list 
     else
-      let self.__items = navigator#items#Build(self)
-      return self.__items.list
+      call self.update()
+      return self.__sections.list
     endif
   endfunction
 
   function navigator.reset() 
-    if has_key(self, '__items')
-      unlet self.__items
+    if has_key(self, '__sections')
+      unlet self.__sections
     endif  
   endfunction
 
-  function navigator.update()
+  function navigator.update() abort
     call self.reset()
-    call self.items()
+    let self.__sections = self.parser.parse()
   endfunction  
 
-  function navigator.getItem(lnum)
-    call self.items()
-    return self.__items.get(a:lnum)
+  function navigator.getSection(lnum) abort
+    call self.listOfSections()
+    return self.__sections.get(a:lnum)
   endfunction
 
   " Returns {foldlevel} of the line {lnum}
-  " according to the current {items}.
+  " according to the current {sections}.
   function navigator.foldLevel(lnum) abort
-    let item = self.getItem(a:lnum)
+    let item = self.getSection(a:lnum)
     return (has_key(item, 'fold')) ? item.fold : 0
   endfunction  
 
