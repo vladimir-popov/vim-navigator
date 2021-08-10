@@ -75,6 +75,7 @@ function! s:BuildList(navigator) abort
   const IsStart = s:GetFunction(a:navigator, 'beginningOfSection')
 
   let items = []
+  let unfitems = []
   let fold = 0
   for lnum in range(1, line('$'))
     if IsStart(lnum)
@@ -82,11 +83,13 @@ function! s:BuildList(navigator) abort
       let fold = s:GetFold(a:navigator, lnum, fold) 
       let item = { 'begin':  lnum, 'fold': fold, 'title': title }
       call add(items, item)
+      call add(unfitems, item)
     endif
-    if s:IsEnd(a:navigator, lnum)
-      let item = s:NotFinishedItem(items)
+    if s:IsEnd(a:navigator, lnum) && !empty(unfitems)
+      let item = get(unfitems, -1)
       let item.end = lnum 
       let fold -= 1
+      call remove(unfitems, -1)
     endif
   endfor
 

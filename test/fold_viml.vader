@@ -1,4 +1,4 @@
-Given(VimL like buffer):
+Given(VimL buffer):
   -- content --     1  0
   start             2  1
     -- content --   3  1
