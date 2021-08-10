@@ -70,25 +70,29 @@ function! s:BuildSectionsList(parser) abort
   let sections = []
   " [ { 'constructor': newSection, 'section': section }  ]
   let unfinished_sections = []
-  let current_fold = 0
 
-  function! Open(newSection, lnum) closure
-    let title = s:GetTitle(a:newSection, a:lnum)
-    let current_fold = s:GetFold(a:newSection, a:lnum, current_fold) 
-    let us = { 
+  function! Open(description, lnum) closure
+    let title = s:GetTitle(a:description, a:lnum)
+    let fold = has_key(a:description, 'Fold')
+          \ ? a:description.Fold(a:lnum)
+          \ : !empty(unfinished_sections) 
+          \ ? unfinished_sections[-1].section.fold + 1
+          \ : 1
+    " prevents two sequential sections with the same fold level
+    let fold = empty(sections) ? fold : sections[-1].fold == fold ? fold + 1 : fold
+    let section = { 
           \ 'begin':  a:lnum, 
-          \ 'fold': current_fold, 
+          \ 'fold': fold, 
           \ 'title': title, 
-          \ 'type': a:newSection.type 
+          \ 'type': a:description.type 
           \ }
-    call add(sections, us)
-    call add(unfinished_sections, { 'description': a:newSection, 'section': us })
+    call add(sections, section)
+    call add(unfinished_sections, { 'description': a:description, 'section': section })
   endfunction
 
   function! Close(lnum) closure
     let section = unfinished_sections[-1].section
     let section.end = a:lnum 
-    let current_fold -= 1
     call remove(unfinished_sections, -1)
   endfunction
 
@@ -137,26 +141,12 @@ function! s:MaybeNewSection(parser, lnum)
   return {}
 endfunction
 
-function! s:IsEnd(unfinished_section, lnum) abort
-  return has_key(a:unfinished_section.description, 'End')
-        \ ? a:unfinished_section.description.End(lnum)
-        \ :
-endfunction
-
 function! s:GetTitle(description, lnum)
   if has_key(a:description, 'Title')
     return a:description.Title(a:lnum)
   else 
     return getline(a:lnum)
   endif 
-endfunction
-
-function! s:GetFold(description, lnum, curfold)
-  if has_key(a:description, 'Fold')
-    return a:description.Fold(a:lnum)
-  else
-    return a:curfold + 1
-  endif
 endfunction
 
 " If {sections} has an section which include the specified line
