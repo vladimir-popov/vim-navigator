@@ -12,11 +12,11 @@
 " with folow functions: >
 "   {
 "     'Begin': { lnum -> <bool> },   " to find the first line of the section;
-"     'End':   { lnum -> <bool> } ,  " to find the last line of the section;
-"     'Title': { lnum -> <string> }, " optional; can be used to set more;
-"                                    " particular section title;
-"     'Fold':  { lnum -> <number> }  " optional; to specify a custom fold
-"                                    " level for the section;
+"     'End':   { lnum -> <bool> } ,  " opt; to find the last line of the section;
+"     'Title': { lnum -> <string> }, " opt; can be used to set more specific
+"                                    " section title;
+"     'Fold':  { lnum -> <number> }  " opt; to specify a custom fold level for
+"                                    " the section;
 "   }
 "
 " The Sections is a dictionary which has a sorted list of 
@@ -70,34 +70,53 @@ function! s:BuildSectionsList(parser) abort
   let sections = []
   " [ { 'constructor': newSection, 'section': section }  ]
   let unfinished_sections = []
-  let fold = 0
+  let current_fold = 0
+
+  function! Open(newSection, lnum) closure
+    let title = s:GetTitle(a:newSection, a:lnum)
+    let current_fold = s:GetFold(a:newSection, a:lnum, current_fold) 
+    let us = { 
+          \ 'begin':  a:lnum, 
+          \ 'fold': current_fold, 
+          \ 'title': title, 
+          \ 'type': a:newSection.type 
+          \ }
+    call add(sections, us)
+    call add(unfinished_sections, { 'description': a:newSection, 'section': us })
+  endfunction
+
+  function! Close(lnum) closure
+    let section = unfinished_sections[-1].section
+    let section.end = a:lnum 
+    let current_fold -= 1
+    call remove(unfinished_sections, -1)
+  endfunction
+
   for lnum in range(1, line('$'))
     " description with additional 'type' property of the section
     " which begins on lnum, or empty dict
     let newSection = s:MaybeNewSection(a:parser, lnum)
 
+    " try to open a section
     if !empty(newSection)
-      let title = s:GetTitle(newSection, lnum)
-      let fold = s:GetFold(newSection, lnum, fold) 
-      let us = { 
-            \ 'begin':  lnum, 
-            \ 'fold': fold, 
-            \ 'title': title, 
-            \ 'type': newSection.type 
-            \ }
-      call add(sections, us)
-      call add(unfinished_sections, { 'description': newSection, 'section': us })
+      " if previous section doesn't have End function
+      if !empty(unfinished_sections) 
+            \ && !has_key(unfinished_sections[-1].description, 'End')
+        call Close(lnum - 1)
+      endif
+
+      call Open(newSection, lnum)
     endif
 
+    " try to close a section using specific function if exists
     if !empty(unfinished_sections) 
+          \ && has_key(unfinished_sections[-1].description, 'End')
           \ && unfinished_sections[-1].description.End(lnum)
-      let us = unfinished_sections[-1].section
-      let us.end = lnum 
-      let fold -= 1
-      call remove(unfinished_sections, -1)
+      call Close(lnum)
     endif
   endfor
 
+  " close all unclosed sections
   for us in unfinished_sections 
     let us.section.end = line('$')
   endfor
@@ -118,6 +137,12 @@ function! s:MaybeNewSection(parser, lnum)
   return {}
 endfunction
 
+function! s:IsEnd(unfinished_section, lnum) abort
+  return has_key(a:unfinished_section.description, 'End')
+        \ ? a:unfinished_section.description.End(lnum)
+        \ :
+endfunction
+
 function! s:GetTitle(description, lnum)
   if has_key(a:description, 'Title')
     return a:description.Title(a:lnum)
@@ -129,15 +154,8 @@ endfunction
 function! s:GetFold(description, lnum, curfold)
   if has_key(a:description, 'Fold')
     return a:description.Fold(a:lnum)
-  elseif has_key(a:description, 'End') 
-    return a:curfold + 1
   else
-    const ind = has_key(a:description, 'indentation') 
-          \ ? a:description.indentation 
-          \ : exists('shiftwidth')
-          \ ? &shiftwidth
-          \ : 2
-    return 1 + indent(a:lnum) / ind
+    return a:curfold + 1
   endif
 endfunction
 

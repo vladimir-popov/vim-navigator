@@ -11,7 +11,7 @@ Given(VimScript like buffer):
   end               10 1
   -- content --     11 0
 
-Execute(Validate items):
+Execute(Validate sections):
   let parser = navigator#parser#New()
   let parser.example = {
     \   'Begin': { i -> getline(i) =~# 'start' },
@@ -35,11 +35,10 @@ Given(Markdown buffer):
   ## Title 2       5 2
   -- content --    6 2
 
-Execute(Validate items):
+Execute(Validate sections):
   let parser = navigator#parser#New()
   let parser.example = {
     \   'Begin': { i -> getline(i) =~# '\v^\s*\#+' },
-    \   'End': { i ->  getline(i) !~# '\v[\#|-]' },
     \   'Fold': { lnum -> len(matchstr(getline(lnum), '\v\#+', 0, 1)) },
     \   'Title': { i -> 'title' }
     \ }
