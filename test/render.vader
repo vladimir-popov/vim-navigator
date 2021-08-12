@@ -1,15 +1,20 @@
 Given(Dirty buffer):
   A previously rendered content
 
-Execute(Render a contents):
-  call navigator#render#Render([
-      \ { 'line': 1, 'fold': 0, 'text': ' Title ' },
-      \ { 'line': 2, 'fold': 0 },
-      \ { 'line': 3, 'fold': 1, 'text': '  Subtitle   ' },
-      \ ], function('trim'))
+Execute(Sections):
+  let sections = [
+      \ { 'begin': 1, 'end': 4, 'fold': 1, 'title': 'Section 1' },
+      \ { 'begin': 2, 'end': 3, 'fold': 2, 'title': 'Section 1.1' },
+      \ { 'begin': 5, 'end': 6, 'fold': 1, 'title': 'Section 2' },
+      \ ]
+
+Execute(Render a simple contents):
+  call navigator#render#SimpleRender(sections)
   call append('$', '----')  
 
 Expect(Contents):
-  Title
-    Subtitle
+
+    Section 1
+      Section 1.1
+    Section 2
   ----

@@ -13,17 +13,11 @@ function! navigator#contents#Show(navigator) abort
   endif
 
   call a:navigator.update()
-  let item = a:navigator.getItem(line('.'))
+  let section = a:navigator.getSection(line('.'))
   call s:CreateBuffer(a:navigator)
-  " getting a function to apply a custom format of a section title 
-  let Format = (has_key(a:navigator, 'formatSectionName'))
-        \ ? a:navigator.formatSectionName
-        \ : { s -> s }
-  let a:navigator.contents.items = navigator#render#Render(
-        \     a:navigator.items(),
-        \     Format
-        \   )
-  let lnum = s:Find(a:navigator.contents.items, item) + 1
+  let a:navigator.contents.items = 
+        \ navigator#render#Render(a:navigator.listOfSections())
+  let lnum = s:Find(a:navigator.contents.items, section) + 1
   execute lnum
   setlocal nomodifiable
 endfunction

@@ -1,30 +1,30 @@
 " ==========================================================
 " This script describes how to render a contents by the list
-" of items.
+" of sections.
 " ==========================================================
 
-" Renders a contents by the {items} from the beginning 
-" of the current buffer. Returns a list of rendered items.
-" Function {format} with type of { str -> str } is used to
-" preformat a text of an  item.
-function! navigator#render#Render(items, format) abort
-  execute ':1,$d'
-  let lnum=0
-  let contents = []
-  let rendered_items = []
-  for item in a:items
-    if has_key(item, 'text')
-      call add(contents, s:CreateLine(item, a:format))
-      call add(rendered_items, item)
-    endif
-  endfor
-  call append(0, contents)
-  execute ':$d'
+" The simplest render which render trimmed titles with padding 
+" according to the fold level of a section.
+function! navigator#render#SimpleRender(sections, ...) abort
+  let settings = a:0 > 0 ? a:2 : {
+        \   'padding': 2
+        \ }
 
-  return rendered_items
+  functio! RenderSection(section) closure
+    const space_count = settings.padding * a:section.fold
+    return repeat(' ', space_count) .. trim(a:section.title)
+  endfunction
+
+  call s:RenderSections(a:sections, function('RenderSection'))
+
 endfunction
 
-functio! s:CreateLine(item, format)
-  const space_count = g:navigator_padding_size * a:item.fold
-  return repeat(' ', space_count) .. a:format(trim(a:item.text))
+" Renders a contents by the {sections} from the beginning 
+" of the current buffer.
+function! s:RenderSections(sections, Render) abort
+  execute ':1,$d'
+  let lnum=0
+  for section in a:sections
+    call append(line('$'), a:Render(section))
+  endfor
 endfunction
