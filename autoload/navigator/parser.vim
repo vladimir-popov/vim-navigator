@@ -40,7 +40,7 @@
 function! navigator#parser#New() abort
   let parser = {}
 
-  function parser.parse() abort
+  function parser.parse()
     let sections = {}
 
     function sections.get(lnum)
@@ -128,13 +128,14 @@ function! s:BuildSectionsList(parser) abort
   return sections
 endfunction
 
-function! s:MaybeNewSection(parser, lnum)
-  let descriptions = filter(a:parser, 'v:key !~ "parse"')
-  for type in keys(descriptions)
-    let description = a:parser[type]
-    if description.Begin(a:lnum)
-      let description.type = type
-      return description
+function! s:MaybeNewSection(parser, lnum) abort
+  for type in keys(a:parser)
+    if type !~ 'parse'
+      let description = a:parser[type]
+      if description.Begin(a:lnum)
+        let description.type = type
+        return description
+      endif
     endif
   endfor
 
@@ -147,27 +148,4 @@ function! s:GetTitle(description, lnum)
   else 
     return getline(a:lnum)
   endif 
-endfunction
-
-" If {sections} has an section which include the specified line
-" {lnum} then return it If no one section will be found the
-" empty dict will be returned.
-function! s:GetSection(sections, lnum)
-  let size = len(a:sections)
-  let middle = size / 2
-  let section = a:sections[middle]
-
-  if size == 1
-    return ( a:section.begin <= a:lnum ) && (a:lnum <= a:section.end) 
-          \ ? section
-          \ : {}
-  endif
-
-  if section.begin > a:lnum
-    return s:GetSection(a:sections[:middle-1], a:lnum)
-  elseif section.begin < a:lnum
-    return s:GetSection(a:sections[middle:], a:lnum)
-  else
-    return a:sections[middle] 
-  endif
 endfunction

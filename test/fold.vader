@@ -12,13 +12,12 @@ Given(Example of a content):
   -- content --     11 0
 
 Execute(Validate folds):
-  let parser = navigator#parser#New()
-  let parser.section = {
+  let navigator = g:NavigatorNew()
+  let navigator.parser.section = {
     \   'Begin': { i -> getline(i) =~ 'start' },
     \   'End': { i -> getline(i) =~ 'end' },
     \   'Title': { i -> join(split(getline(i))) }
     \ }
-  let navigator = g:NavigatorNew(parser)
 
   for i in range(1, line('$'))
     let actual = navigator.foldLevel(i)

@@ -65,32 +65,8 @@ augroup END
 " The main functions of the plugin
 " ==========================================================
 
-" If {b:navigator} already exists, it shows a contents of the
-" current buffer, else just returns message that {b:navigator}
-" is not exists.
-function! g:NavigatorShow()
-  if exists('b:navigator')
-    call navigator#contents#Show(b:navigator)
-    return ''
-  else
-    return 'Navigator is not defined for ' .. bufname('%')
-  endif  
-endfunction  
-
-functio! g:NavigatorClose()
-  if exists('b:navigator')
-    call navigator#contents#Close(b:navigator)
-  endif
-endfunction
-
-function! g:NavigatorReset()
-  if exists('b:navigator')
-    call b:navigator.reset()
-  endif
-endfunction  
-
 " Constructor of the {navigator}
-function! g:NavigatorNew(parser)
+function! g:NavigatorNew() abort
   " '__sections' is a list of setions from the buffer;
   " 'sections' is a dictionary of section tpye -> CONSTRUCTOR 
   " of the sections in the buffer;
@@ -99,7 +75,8 @@ function! g:NavigatorNew(parser)
         \     'id': bufnr('%'), 
         \     'name':  bufname('%') 
         \   },
-        \   'parser': a:parser
+        \   'parser': navigator#parser#New(),
+        \   'render': navigator#render#New()
         \ }
 
   " Lazy getter of the sections - a list of dictionaries such as:
@@ -114,7 +91,7 @@ function! g:NavigatorNew(parser)
       return self.__sections.list 
     else
       call self.update()
-      return self.__sections.list
+      return self.listOfSections()
     endif
   endfunction
 
@@ -130,7 +107,7 @@ function! g:NavigatorNew(parser)
   endfunction  
 
   function navigator.getSection(lnum) abort
-    call self.listOfSections()
+    call self.update()
     return self.__sections.get(a:lnum)
   endfunction
 
@@ -158,4 +135,28 @@ function! g:NavigatorNew(parser)
   endfunction
 
   return navigator
+endfunction  
+
+" If {b:navigator} already exists, it shows a contents of the
+" current buffer, else throw message that {b:navigator}
+" is not exists.
+function! g:NavigatorShow() abort
+  if exists('b:navigator')
+    call navigator#contents#Show(b:navigator)
+    return ''
+  else
+    throw 'Navigator is not defined for ' .. bufname('%')
+  endif  
+endfunction  
+
+functio! g:NavigatorClose()
+  if exists('b:navigator')
+    call navigator#contents#Close(b:navigator)
+  endif
+endfunction
+
+function! g:NavigatorReset()
+  if exists('b:navigator')
+    call b:navigator.reset()
+  endif
 endfunction  

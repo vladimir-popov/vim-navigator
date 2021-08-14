@@ -27,3 +27,25 @@ function! navigator#utils#Keymap(keys, mode, cmd)
           \ .. ' already defined for ' .. actual
   endif
 endfunction
+
+" Trys to find the item in the collection comparing items 
+" through Compare. Compare(x, y) => x > y: 1; x < y: -1; x == y: 0
+" Returns index of found item or -1.
+function! navigator#utils#Find(collection, item, Compare) abort
+  let size = len(a:collection)
+  let middle = size / 2
+  
+  if size == 0
+    return -1
+  elseif size == 1
+    return a:Compare(a:item, a:collection[0]) == 0 ? 0 : -1
+  endif
+
+  if a:Compare(a:item, a:collection[middle]) == 1
+    return navigator#utils#Find(a:collection[:middle-1], a:item, a:Compare)
+  elseif a:Compare(a:item, a:collection[middle]) == -1
+    return navigator#utils#Find(a:collection[middle:], a:item, a:Compare)
+  else 
+    return a:collection[middle]
+  endif
+endfunction

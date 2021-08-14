@@ -5,26 +5,35 @@
 
 " The simplest render which render trimmed titles with padding 
 " according to the fold level of a section.
-function! navigator#render#SimpleRender(sections, ...) abort
-  let settings = a:0 > 0 ? a:2 : {
+function! navigator#render#New() abort
+  let render = {
         \   'padding': 2
         \ }
 
-  functio! RenderSection(section) closure
-    const space_count = settings.padding * a:section.fold
+  function render.renderOne(section) closure
+    const space_count = self.padding * a:section.fold
     return repeat(' ', space_count) .. trim(a:section.title)
   endfunction
 
-  call s:RenderSections(a:sections, function('RenderSection'))
+  " Renders a contents by the {sections} from the beginning 
+  " of the current buffer.
+  " Returns a list of rendered sections.
+  function render.renderAll(sections) abort
+    execute ':1,$d'
+    let rendered_sections = {}
+    for section in a:sections
+      let r_section = self.renderOne(section)
+      if !empty(r_section)
+        let line = line('$')
+        let rendered_sections[section.begin] = { 'line': line }
+        call append(line - 1, r_section)
+      endif
+    endfor
+    execute ':$d'
 
+    return rendered_sections
+  endfunction
+
+  return render
 endfunction
 
-" Renders a contents by the {sections} from the beginning 
-" of the current buffer.
-function! s:RenderSections(sections, Render) abort
-  execute ':1,$d'
-  let lnum=0
-  for section in a:sections
-    call append(line('$'), a:Render(section))
-  endfor
-endfunction

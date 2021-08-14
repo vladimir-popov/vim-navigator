@@ -9,11 +9,18 @@ Execute(Sections):
       \ ]
 
 Execute(Render a simple contents):
-  call navigator#render#SimpleRender(sections)
+  let render = navigator#render#New()
+  let rendered = render.renderAll(sections)
   call append('$', '----')  
 
-Expect(Contents):
+  " number of line in the Contents buffer must be added 
+  " to rendered sections
+  for i in range(len(sections))
+    let id = sections[i].begin
+    AssertEqual i + 1, rendered[id].line
+  endfor
 
+Expect(Contents):
     Section 1
       Section 1.1
     Section 2

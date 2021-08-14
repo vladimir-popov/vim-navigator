@@ -1,6 +1,6 @@
 " ==========================================================
-" This script describes a logic to build and show a Contents 
-" of the current buffer.
+" This script describes a logic of building and showing a 
+" Contents of the current buffer.
 " ==========================================================
 
 " Clears the {navigator}, creates a new buffer and render 
@@ -12,14 +12,20 @@ function! navigator#contents#Show(navigator) abort
     return 0
   endif
 
-  call a:navigator.update()
-  let section = a:navigator.getSection(line('.'))
-  call s:CreateBuffer(a:navigator)
-  let a:navigator.contents.items = 
-        \ navigator#render#Render(a:navigator.listOfSections())
-  let lnum = s:Find(a:navigator.contents.items, section) + 1
-  execute lnum
-  setlocal nomodifiable
+  try
+    call a:navigator.update()
+    call s:CreateBuffer(a:navigator)
+    let a:navigator.contents.sections = a:navigator.render
+          \.renderAll(a:navigator.listOfSections())
+
+    let id = a:navigator.getSection(line('.')).begin
+    let r_section = a:navigator.contents.sections[id]
+    execute has_key(r_section, 'line') ? r_section.line : 0
+    setlocal nomodifiable
+  catch 
+    call navigator#contents#Close(a:navigator)
+    throw string(v:exception)
+  endtry
 endfunction
 
 " Checks that the {navigator} has the 'contents.bid'
@@ -38,7 +44,7 @@ function! navigator#contents#Goto() abort
   endif
 
   const lnum = max([ line('.') - 1, 0 ])
-  const goto_line = b:navigator.contents.items[lnum].line
+  const goto_line = b:navigator.contents.sections[lnum].begin
   call navigator#contents#Close(b:navigator)
   execute goto_line
 endfunction
@@ -66,28 +72,11 @@ function! navigator#contents#Close(navigator)
   unlet a:navigator.contents
 endfunction
 
-" Returns the number of item in the list by the 
-" line number or 0.
-function! s:Find(items, item)
-  if empty(a:item)
-    return 0
-  endif
-
-  let l = 0 
-  while l < len(a:items)
-    if a:items[l].line == a:item.line
-      return l
-    endif
-    let l += 1
-  endwhile
-  return 0
-endfunction
-
 function! s:CreateBuffer(navigator) abort
   let a:navigator.contents = {}
 
   let a:navigator.contents.buffer = 
-        \ 'contents_of_' .. a:navigator.buffer.name 
+        \ 'contents_of_[' .. a:navigator.buffer.name .. ']'
   let a:navigator.contents.bid = bufadd(a:navigator.contents.buffer)
   if (a:navigator.mode() == 'r')
     execute 'silent! botright vsplit ' .. a:navigator.contents.buffer

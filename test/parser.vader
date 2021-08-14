@@ -6,6 +6,13 @@ Given(Markdown buffer):
   ## Title 2       5
   -- content --    6
 
+Execute(Prepare Assertion):
+  function! g:AssertEqual(expected, actual, fields)
+    for k in a:fields
+      AssertEqual a:expected[k], a:actual[k]
+    endfor
+  endfunction
+
 Execute(Validate sections):
   let parser = navigator#parser#New()
   let parser.example = {
@@ -14,12 +21,18 @@ Execute(Validate sections):
     \   'Title': { i -> 'title' }
     \ }
 
-  let expectedItems = [
+  let expectedSections = [
     \ { 'begin': 2, 'end': 4, 'fold': 3, 'title': 'title', 'type': 'example' },
     \ { 'begin': 5, 'end': 6, 'fold': 2, 'title': 'title', 'type': 'example' },
     \ ]
 
-  AssertEqual expectedItems, parser.parse().list
+  let actualSections = parser.parse().list
+
+  for i in range(len(actualSections))
+    let actual = actualSections[i]
+    let expected = expectedSections[i]
+    g:AssertEqual(expected, actual, ['begin', 'end', 'fold', 'title', 'example'])
+  endfor
 
 Given(VimScript like buffer):
   " Description     1
@@ -54,4 +67,10 @@ Execute(Validate sections):
     \ {'begin': 7, 'end': 8, 'fold': 4, 'title': 'start 7', 'type': 'section' },
     \ ]
 
-  AssertEqual expectedSections, parser.parse().list
+  let actualSections = parser.parse().list
+
+  for i in range(len(actualSections))
+    let actual = actualSections[i]
+    let expected = expectedSections[i]
+    g:AssertEqual(expected, actual, ['begin', 'end', 'fold', 'title', 'example'])
+  endfor
