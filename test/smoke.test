@@ -28,7 +28,7 @@
 " which explicitly become the current buffer.
 
 Execute:
-  Log 'Prepare the given buffer'
+  Log 'Prepare the main buffer'
   const file_type = &filetype
   let content = getbufline('%', 1, '$')
   let main_bid = bufadd('Main')
@@ -37,28 +37,36 @@ Execute:
   execute ':$d'
   execute ':set filetype=' .. g:file_type
   AssertEqual main_bid, bufnr('%')
+  Log "Main buffer:\n" .. "----\n" .. join(content, "\n") .. "\n----"
   
   if exists('g:init_line')
     Log 'Put cursor on the line ' .. g:init_line
     execute g:init_line
+    Log g:init_line .. ': ' .. getline(g:init_line)
   endif
   Log 'Open the Contents'
   execute ':NavigatorShow'
   AssertEqual b:navigator.contents.bid, bufnr('%')
+  Log "Contents buffer:\n" .. "----\n" .. join(getline(1, '$'), "\n") .. "\n----"
+
 
   " Here we can check the position of the cursor 
   " in the contents
   if exists('g:selected_contents_line')
     Log 'Cursor should be on the line ' .. g:selected_contents_line
+    Log g:selected_contents_line .. ': ' .. getline(g:selected_contents_line)
     AssertEqual g:selected_contents_line, line('.')
   endif  
 
   " Let's check that cursor will be placed on the correct line
   " after "Goto" from the Contents
   if exists('g:from_contents_line') && exists('g:final_line')
-    Log 'Go to the line ' .. getline(g:from_contents_line)
+    Log 'Go from the line ' .. g:from_contents_line .. ' in contents'
     execute g:from_contents_line
+    Log g:from_contents_line .. ': ' .. getline(g:from_contents_line)
     call navigator#contents#Goto()
+    Log 'To the line ' .. g:final_line .. ' in the main buffer'
+    Log g:final_line .. ': ' .. getline(g:final_line)
     AssertEqual b:navigator.buffer.id, bufnr('%')
     AssertEqual g:final_line, line('.')
   endif  

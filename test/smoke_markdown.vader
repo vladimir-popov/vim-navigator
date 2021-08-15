@@ -7,7 +7,7 @@ Execute:
 Given markdown (Buffer with a simple markdown):
   # Title
   text
-   ## Subtitle ##
+  ## Subtitle ##
   initial line
   ### Subtitle 3 
 

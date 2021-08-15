@@ -5,7 +5,7 @@ function! NavigatorMarkdown()
   if !exists('b:navigator') 
     let b:navigator = g:NavigatorNew()
     let b:navigator.parser.section = {
-          \ 'Begin': { lnum -> getline(lnum) =~# '\v^\s*\#+' },
+          \ 'Begin': { lnum -> getline(lnum) =~# '\v^\#+' },
           \ 'Fold':  { lnum -> len(matchstr(getline(lnum), '\v\#+', 0, 1)) }
           \ }
   endif

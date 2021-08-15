@@ -33,13 +33,18 @@ function! navigator#contents#Show(navigator) abort
 
   try
     call a:navigator.update()
-    let section = a:navigator.getSection(line('.'))
+    let line = line('.')
+    let section = a:navigator.getSection(line)
     call s:CreateBuffer(a:navigator)
     let a:navigator.contents.items = a:navigator.render
           \.renderAll(a:navigator.listOfSections())
+    
+    " all changes are done, let's make buffer read only
+    setlocal nomodifiable
+
+    " put cursor on the line with appropriate item
     let item = a:navigator.contents.getItem(section)
     execute empty(item) ? 0 : item.line 
-    setlocal nomodifiable
   catch 
     call navigator#contents#Close(a:navigator)
     throw string(v:exception)
@@ -61,9 +66,9 @@ function! navigator#contents#Goto() abort
           \ .. bufname('%')
   endif
 
-  let lnum = max([ line('.') - 1, 0 ])
-  call navigator#contents#Close(b:navigator)
+  let lnum = max([ line('.'), 1 ])
   let item = b:navigator.contents.getItem(lnum)
+  call navigator#contents#Close(b:navigator)
   execute empty(item) ? 0 : item.section.begin
 endfunction
 
@@ -85,16 +90,10 @@ function! navigator#contents#Close(navigator)
 
   " close the buffer with a contents.
   execute 'silent!  bwipeout ' .. a:navigator.contents.buffer
-
-  " cleanup the navigator
-  unlet a:navigator.contents
 endfunction
 
 function! s:CreateBuffer(navigator) abort
   let contents = {}
-
-  let contents.buffer = 'contents_of_[' .. a:navigator.buffer.name .. ']'
-  let contents.bid = bufadd(contents.buffer)
 
   function contents.refreshIndexes()
     if !(
@@ -125,11 +124,14 @@ function! s:CreateBuffer(navigator) abort
     endif
   endfunction
 
+  let contents.buffer = 'contents of [' .. a:navigator.buffer.name .. ']'
+  let contents.bid = bufadd(contents.buffer)
+
   let a:navigator.contents = contents
 
   if (a:navigator.mode() == 'r')
     execute 'silent! botright vsplit ' .. a:navigator.contents.buffer
-  else
+  else " if mode == 'b'
     execute 'silent buffer! ' .. a:navigator.contents.bid
   endif
 
@@ -138,6 +140,8 @@ function! s:CreateBuffer(navigator) abort
   setlocal noswapfile noshowcmd nobuflisted
   setlocal nonumber norelativenumber nocursorcolumn nolist 
   setlocal foldmethod=indent
+  " make buffer temporary modifiable to rendering
+  setlocal modifiable
 
   " keymapping:
   execute 'nnoremap <silent> <nowait> <buffer> ' 
