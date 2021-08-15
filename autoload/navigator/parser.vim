@@ -78,8 +78,6 @@ function! s:BuildSectionsList(parser) abort
           \ : !empty(unfinished_sections) 
           \ ? unfinished_sections[-1].section.fold + 1
           \ : 1
-    " prevents two sequential sections with the same fold level
-    let fold = empty(sections) ? fold : sections[-1].fold == fold ? fold + 1 : fold
     let section = { 
           \ 'begin':  a:lnum, 
           \ 'fold': fold, 

@@ -11,7 +11,7 @@ To install this plugin with the [Plug](https://github.com/junegunn/vim-plug),
 add this `'vladimir-popov/vim-navigator'` to your `.vimrc` and run
 `:PlugInstall`.
 
-## Commands:
+## Commands
 
 - `:NavigatorShow` - to show a contents of the current buffer (`<F12>` by
   default).
@@ -39,10 +39,10 @@ g:navigator_goto_nmap='<cr>'
 
 Navigator has an option to show contents in different modes:
 
-  - 'b' a base mode in which the contents are shown in the same windows as the
+  - 'b' a mode in which the contents are shown in the same windows as the
     current buffer 
   - 'r' a default mode in which the contents are shown in the new window split
-    vertically
+    vertically on right side of the buffer.
 
 To change an open mode you should override the `g:navigator_open_mode` variable.
 To do so, add the following to your `.vimrc`:
