@@ -17,7 +17,7 @@ Execute(Validate sections):
   let parser = navigator#parser#New()
   let parser.example = {
     \   'Begin': { i -> getline(i) =~# '\v^\s*\#+' },
-    \   'Fold': { lnum -> len(matchstr(getline(lnum), '\v\#+', 0, 1)) },
+    \   'Fold': { i -> len(matchstr(getline(i), '\v\#+', 0, 1)) },
     \   'Title': { i -> 'title' }
     \ }
 
@@ -31,7 +31,7 @@ Execute(Validate sections):
   for i in range(len(actualSections))
     let actual = actualSections[i]
     let expected = expectedSections[i]
-    g:AssertEqual(expected, actual, ['begin', 'end', 'fold', 'title', 'example'])
+    g:AssertEqual(expected, actual, ['begin', 'end', 'fold', 'title', 'type'])
   endfor
 
 Given(VimScript like buffer):
@@ -72,5 +72,5 @@ Execute(Validate sections):
   for i in range(len(actualSections))
     let actual = actualSections[i]
     let expected = expectedSections[i]
-    g:AssertEqual(expected, actual, ['begin', 'end', 'fold', 'title', 'example'])
+    g:AssertEqual(expected, actual, ['begin', 'end', 'fold', 'title', 'type'])
   endfor

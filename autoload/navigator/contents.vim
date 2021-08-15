@@ -1,6 +1,25 @@
 " ==========================================================
 " This script describes a logic of building and showing a 
 " Contents of the current buffer.
+" Contents is a dictionary such as: >
+" {
+"   'buffer': <string>,   " name of the Contents buffer
+"   'bid': <number>,      " id of the Contents buffer
+"   'items': <list>,      " list of items
+"   'getItem': <funcref>, " function  { Section -> Item } or 
+"                         " { Lnum -> Item } to get an item 
+"                         " corresponding to the section or 
+"                         " number of line in the Contents
+"                         " buffer.
+"   'index_by_sections': <dict>,
+"   'index_by_items': <dict>,
+" } 
+" Every Item of the Contents is a dictionary such as: >
+" {
+"   'line': <number>,   " number of the line in the Contents 
+"                       " buffer where Item has been rendered
+"   'section': <dict>,  " corresponding section
+" }
 " ==========================================================
 
 " Clears the {navigator}, creates a new buffer and render 
@@ -14,13 +33,12 @@ function! navigator#contents#Show(navigator) abort
 
   try
     call a:navigator.update()
+    let section = a:navigator.getSection(line('.'))
     call s:CreateBuffer(a:navigator)
-    let a:navigator.contents.sections = a:navigator.render
+    let a:navigator.contents.items = a:navigator.render
           \.renderAll(a:navigator.listOfSections())
-
-    let id = a:navigator.getSection(line('.')).begin
-    let r_section = a:navigator.contents.sections[id]
-    execute has_key(r_section, 'line') ? r_section.line : 0
+    let item = a:navigator.contents.getItem(section)
+    execute empty(item) ? 0 : item.line 
     setlocal nomodifiable
   catch 
     call navigator#contents#Close(a:navigator)
@@ -43,10 +61,10 @@ function! navigator#contents#Goto() abort
           \ .. bufname('%')
   endif
 
-  const lnum = max([ line('.') - 1, 0 ])
-  const goto_line = b:navigator.contents.sections[lnum].begin
+  let lnum = max([ line('.') - 1, 0 ])
   call navigator#contents#Close(b:navigator)
-  execute goto_line
+  let item = b:navigator.contents.getItem(lnum)
+  execute empty(item) ? 0 : item.section.begin
 endfunction
 
 " If the {navigator} is shown returns 0, else 
@@ -73,11 +91,42 @@ function! navigator#contents#Close(navigator)
 endfunction
 
 function! s:CreateBuffer(navigator) abort
-  let a:navigator.contents = {}
+  let contents = {}
 
-  let a:navigator.contents.buffer = 
-        \ 'contents_of_[' .. a:navigator.buffer.name .. ']'
-  let a:navigator.contents.bid = bufadd(a:navigator.contents.buffer)
+  let contents.buffer = 'contents_of_[' .. a:navigator.buffer.name .. ']'
+  let contents.bid = bufadd(contents.buffer)
+
+  function contents.refreshIndexes()
+    if !(
+          \has_key(self, 'items') 
+          \&& has_key(self, 'index_by_sections') 
+          \&& has_key(self, 'index_by_items')
+          \)
+      let self.index_by_sections = {}
+      let self.index_by_items = {}
+      for item in self.items
+        let self.index_by_sections[item.section.begin] = item
+        let self.index_by_items[item.line] = item
+      endfor
+    endif
+  endfunction
+
+  function contents.getItem(key)
+    if !has_key(self, 'items') 
+      return {}
+    endif
+    call self.refreshIndexes()
+    if type(a:key) == v:t_dict && !empty(a:key)
+      return get(self.index_by_sections, a:key.begin, {})
+    elseif type(a:key) == v:t_number
+      return get(self.index_by_items, a:key, {})
+    else
+      return {}
+    endif
+  endfunction
+
+  let a:navigator.contents = contents
+
   if (a:navigator.mode() == 'r')
     execute 'silent! botright vsplit ' .. a:navigator.contents.buffer
   else

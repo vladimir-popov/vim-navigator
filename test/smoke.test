@@ -54,7 +54,7 @@ Execute:
   endif  
 
   " Let's check that cursor will be placed on the correct line
-  " after "Goto" from the contents
+  " after "Goto" from the Contents
   if exists('g:from_contents_line') && exists('g:final_line')
     Log 'Go to the line ' .. getline(g:from_contents_line)
     execute g:from_contents_line
@@ -63,6 +63,6 @@ Execute:
     AssertEqual g:final_line, line('.')
   endif  
 
-  " Show the contents to be able to compare it with Expect block
+  " Show the Contents to be able to compare it with Expect block
   execute ':NavigatorShow'
 

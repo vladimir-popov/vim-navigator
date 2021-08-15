@@ -16,7 +16,7 @@ Given vim (Buffer with a simple vimscript):
 
 Include: smoke.test
 
-Expect vim:
+Expect:
     function A(args) abort
       func B()
     function C()
