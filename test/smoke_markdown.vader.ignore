@@ -11,6 +11,7 @@ Given markdown (Buffer with a simple markdown):
   initial line
   ### Subtitle 3 
 
+
 Include: smoke.test
 
 Expect:
