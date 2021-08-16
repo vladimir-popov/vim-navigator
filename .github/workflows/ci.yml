@@ -20,3 +20,4 @@ jobs:
           name: junegunn/vader.vim
       - uses: rhysd/action-setup-vim@v1
       - run: ./test/ci.sh
+      - run: vim -EsNu ./test/vimrc.ci -c "Vader! ./test/render.vader"
