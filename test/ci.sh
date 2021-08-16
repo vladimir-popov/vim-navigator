@@ -6,7 +6,7 @@ NC='\033[0m'
 
 for test in *.vader
 do 
-  nvim -EsNu vimrc.ci -c "Vader! $test"
+  vim -EsNu vimrc.ci -c "Vader! $test"
 
   if [[ $? == 0 ]]
   then
