@@ -2,10 +2,7 @@
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
-NC='\033[0m' 
-
-function run() {
-}
+NC='\033[0m'
 
 for test in ./test/*.vader
 do 
