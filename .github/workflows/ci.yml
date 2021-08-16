@@ -23,10 +23,4 @@ jobs:
         with:
           neovim: true
       - run: ls -a
-      - run: vim -EsNu <(cat << EOF
-             filetype off
-             set rtp+=.
-             set rtp+=vader.vim
-             filetype plugin indent on
-             syntax enable
-             ) -c "Vader! ./test/render.vader"
+      - run: vim -EsNu ./test/vimrc.ci -c "Vader! ./test/render.vader"
