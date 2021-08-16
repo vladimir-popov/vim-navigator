@@ -1,3 +1,4 @@
+" =========================================================
 " Copyright 2021 Vladimir Popov <vladimir@dokwork.ru>
 " 
 " Permission is hereby granted, free of charge, to any person
@@ -21,6 +22,7 @@
 " OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 " OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 " SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+" ==========================================================
 
 
 
@@ -34,8 +36,6 @@ call navigator#utils#DefaultValue('g:navigator_show_nmap', '<f12>')
 call navigator#utils#DefaultValue('g:navigator_close_nmap', '<f12>')
 " Keymap to go to the selected section
 call navigator#utils#DefaultValue('g:navigator_goto_nmap', '<cr>')
-" Size of tabulation in the Contents
-call navigator#utils#DefaultValue('g:navigator_padding_size', 2)
 " Where the buffer with contents should be opened 
 call navigator#utils#DefaultValue('g:navigator_open_mode', 'r')
 
@@ -46,7 +46,6 @@ call navigator#utils#DefaultValue('g:navigator_open_mode', 'r')
 
 command! NavigatorShow :echo g:NavigatorShow()
 command! NavigatorClose :call g:NavigatorClose()
-command! NavigatorGoto :call navigator#contents#Goto()
 
 call navigator#utils#Keymap(g:navigator_show_nmap, 'n', ':NavigatorShow<cr>')
 
@@ -66,75 +65,56 @@ augroup END
 " The main functions of the plugin
 " ==========================================================
 
-" If {b:navigator} already exists, it shows a contents of the
-" current buffer, else just returns message that {b:navigator}
-" is not exists.
-function! g:NavigatorShow()
-  if exists('b:navigator')
-    call navigator#contents#Show(b:navigator)
-    return ''
-  else
-    return 'Navigator is not defined for ' .. bufname('%')
-  endif  
-endfunction  
-
-functio! g:NavigatorClose()
-  if exists('b:navigator')
-    call navigator#contents#Close(b:navigator)
-  endif
-endfunction
-
-function! g:NavigatorReset()
-  if exists('b:navigator')
-    call b:navigator.reset()
-  endif
-endfunction  
-
 " Constructor of the {navigator}
-function! g:NavigatorNew()
+function! g:NavigatorNew() abort
+  " '__sections' is a list of setions from the buffer;
+  " 'sections' is a dictionary of section tpye -> CONSTRUCTOR 
+  " of the sections in the buffer;
   let navigator = { 
         \  'buffer': { 
         \     'id': bufnr('%'), 
         \     'name':  bufname('%') 
         \   },
-        \   'formatTitle': { s -> s }
+        \   'parser': navigator#parser#New(),
+        \   'render': navigator#render#New()
         \ }
 
-  " Lazy getter of the items - a list of dictionaries such as:
-  " { 'line': <number>, 'fold': <number>[, 'title': <string>] }
+  " Lazy getter of the sections - a list of dictionaries such as:
+  " { 'begin': <number>, 'end': <number>, 'fold': <number>, 'title': <string> }
   " where:
-  "   - 'line' is a number of the line in the buffer;
-  "   - 'fold' is a fold level on the 'line';
-  "   - 'title' is an optional title of the 'line'.
-  "     Usualy it means that its 'line' is a header.
-  function navigator.items() abort
-    if has_key(self, '__items')
-      return self.__items 
+  "   - 'begin' is a number of the first line of the section in the buffer;
+  "   - 'end' is a number of the last line of the section in the buffer;
+  "   - 'fold' is a fold level on the section;
+  "   - 'title' is an title of the section.
+  function navigator.listOfSections() abort
+    if has_key(self, '__sections')
+      return self.__sections.list 
     else
-      let self.__items = navigator#items#Build(self)
-      return self.__items
+      call self.update()
+      return self.listOfSections()
     endif
   endfunction
 
   function navigator.reset() 
-    if has_key(self, '__items')
-      unlet self.__items
+    if has_key(self, '__sections')
+      unlet self.__sections
     endif  
   endfunction
 
-  function navigator.update()
+  function navigator.update() abort
     call self.reset()
-    call self.items()
+    let self.__sections = self.parser.parse()
   endfunction  
 
-  function navigator.getItem(lnum)
-    return navigator#items#GetItem(self.items(), a:lnum)
+  function navigator.getSection(lnum) abort
+    call self.update()
+    return self.__sections.get(a:lnum)
   endfunction
 
   " Returns {foldlevel} of the line {lnum}
-  " according to the current {items}.
+  " according to the current {sections}.
   function navigator.foldLevel(lnum) abort
-    let item = self.getItem(a:lnum)
+    let item = self.getSection(a:lnum)
     return (has_key(item, 'fold')) ? item.fold : 0
   endfunction  
 
@@ -150,9 +130,29 @@ function! g:NavigatorNew()
     endif
   endfunction
 
-  function navigator.settings()
-    return { 'padding': g:navigator_padding_size }
-  endfunction
-
   return navigator
+endfunction  
+
+" If {b:navigator} already exists, it shows a contents of the
+" current buffer, else throw message that {b:navigator}
+" is not exists.
+function! g:NavigatorShow() abort
+  if exists('b:navigator')
+    call navigator#contents#Show(b:navigator)
+    return ''
+  else
+    throw 'Navigator is not defined for ' .. bufname('%')
+  endif  
+endfunction  
+
+functio! g:NavigatorClose()
+  if exists('b:navigator')
+    call navigator#contents#Close(b:navigator)
+  endif
+endfunction
+
+function! g:NavigatorReset()
+  if exists('b:navigator')
+    call b:navigator.reset()
+  endif
 endfunction  

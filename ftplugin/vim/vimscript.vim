@@ -1,14 +1,16 @@
 setlocal foldmethod=expr
 setlocal foldexpr=NavigatorVimScript().foldLevel(v:lnum)
 
-function! NavigatorVimScript()
+function! g:NavigatorVimScript() abort
   if !exists('b:navigator') 
     let b:navigator = g:NavigatorNew()
-    let b:navigator.beginningOfSection = { str -> str =~# '\v^\s*fun' }
-    let b:navigator.endOfSection = { str -> str =~# '\v^\s*endfunction' }
+    let b:navigator.parser.function = {
+          \  'Begin': { lnum -> getline(lnum) =~# '\v^\s*fun' },
+          \  'End': { lnum -> getline(lnum) =~# '\v^\s*endf' }
+          \}
   endif
 
   return b:navigator
 endfunction
 
-call NavigatorVimScript()
+call g:NavigatorVimScript()

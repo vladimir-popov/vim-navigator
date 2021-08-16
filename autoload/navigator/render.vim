@@ -1,30 +1,46 @@
 " ==========================================================
 " This script describes how to render a contents by the list
-" of items.
+" of sections.
+" Result is a dictionary with rendered items. Key is a number
+" of the line in the original buffer on wich some section 
+" begin. Value is dectionary such as: >
+"   {
+"     'line': <number of the line in the Contents buffer>
+"   }
 " ==========================================================
 
-" Renders a contents by the {items} from the beginning 
-" of the current buffer. Returns a list of rendered items.
-" Function {format} with type of { str -> str } is used to
-" preformat a text of an  item.
-function! navigator#render#Render(items, format) abort
-  execute ':1,$d'
-  let lnum=0
-  let contents = []
-  let rendered_items = []
-  for item in a:items
-    if has_key(item, 'text')
-      call add(contents, s:CreateLine(item, a:format))
-      call add(rendered_items, item)
-    endif
-  endfor
-  call append(0, contents)
-  execute ':$d'
+" The simplest render which render trimmed titles with padding 
+" according to the fold level of a section.
+function! navigator#render#New() abort
+  let render = {
+        \   'padding': 2
+        \ }
 
-  return rendered_items
+  function render.renderOne(section) closure
+    const space_count = self.padding * a:section.fold
+    return repeat(' ', space_count) .. trim(a:section.title)
+  endfunction
+
+  " Renders a contents by the {sections} from the beginning 
+  " of the current buffer.
+  " Returns a list of rendered sections.
+  function render.renderAll(sections) abort
+    execute ':1,$d'
+    let items = []
+    
+    for section in a:sections
+      let text = self.renderOne(section)
+      if !empty(text)
+        let line = line('$')
+        call add(items, { 'line': line, 'section': section })
+        call append(line - 1, text)
+      endif
+    endfor
+    execute ':$d'
+
+    return items
+  endfunction
+
+  return render
 endfunction
 
-functio! s:CreateLine(item, format)
-  const space_count = g:navigator_padding_size * a:item.fold
-  return repeat(' ', space_count) .. a:format(trim(a:item.text))
-endfunction

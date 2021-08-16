@@ -1,0 +1,78 @@
+Given(Markdown buffer):
+  -- content --    1
+  ### Title 3      2
+  -- content --    3
+                   4
+  ## Title 2       5
+  -- content --    6
+
+Execute(Prepare Assertion):
+  function! g:CompareFields(expected, actual, fields)
+    for k in a:fields
+      AssertEqual a:expected[k], a:actual[k], 
+      \ 'Field "' .. k .. '": ' .. 
+      \ a:expected[k] .. ' should be equal to ' .. a:actual[k]
+    endfor
+  endfunction
+
+Execute(Validate sections):
+  let parser = navigator#parser#New()
+  let parser.example = {
+    \   'Begin': { i -> getline(i) =~# '\v^\#+' },
+    \   'Fold': { i -> len(matchstr(getline(i), '\v\#+', 0, 1)) },
+    \   'Title': { i -> 'title' }
+    \ }
+
+  let expectedSections = [
+    \ { 'begin': 2, 'end': 4, 'fold': 3, 'title': 'title', 'type': 'example' },
+    \ { 'begin': 5, 'end': 6, 'fold': 2, 'title': 'title', 'type': 'example' },
+    \ ]
+
+  let actualSections = parser.parse().list
+
+  for i in range(len(actualSections))
+    let actual = actualSections[i]
+    let expected = expectedSections[i]
+    call g:CompareFields(expected, actual, ['begin', 'end', 'fold', 'title', 'type'])
+  endfor
+
+Given(VimScript like buffer):
+  " Description     1
+  start             2
+    -- content --   3
+    start           4
+      -- content -- 5
+    end             6
+    start           7
+    end             8
+    -- content --   9
+  end               10
+  -- content --     11
+
+Execute(Validate sections):
+  let parser = navigator#parser#New()
+  let parser.description = {
+    \   'Begin': { i -> getline(i) =~ '\v^"' },
+    \   'End': { i -> getline(i + 1) !~ '\v^"' },
+    \   'Title': { i -> 'comment' }
+    \ }
+  let parser.section = {
+    \   'Begin': { i -> getline(i) =~ 'start' },
+    \   'End': { i -> getline(i) =~ 'end' },
+    \   'Title': { i -> join(split(getline(i))) }
+    \ }
+
+  let expectedSections = [
+    \ {'begin': 1, 'end': 1, 'fold': 1, 'title': 'comment', 'type': 'description' },
+    \ {'begin': 2, 'end': 10, 'fold': 1, 'title': 'start 2', 'type': 'section' },
+    \ {'begin': 4, 'end': 6, 'fold': 2, 'title': 'start 4', 'type': 'section' },
+    \ {'begin': 7, 'end': 8, 'fold': 2, 'title': 'start 7', 'type': 'section' },
+    \ ]
+
+  let actualSections = parser.parse().list
+
+  for i in range(len(actualSections))
+    let expected = expectedSections[i]
+    let actual = actualSections[i]
+    call g:CompareFields(expected, actual, ['begin', 'end', 'fold', 'title', 'type'])
+  endfor

@@ -5,11 +5,12 @@ Execute:
   const g:final_line = 5
 
 Given markdown (Buffer with a simple markdown):
-  # Title
-  text
+   # Title
+   text
    ## Subtitle ##
-  initial line
-  ### Subtitle 3 
+   initial line
+   ### Subtitle 3 
+
 
 Include: smoke.test
 
