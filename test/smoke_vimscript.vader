@@ -5,14 +5,14 @@ Execute:
   const g:final_line = 7
 
 Given vim (Buffer with a simple vimscript):
-  function A(args) abort
-    func B()
-      " from this line (3)
-    endfunction
-  endfunction  
-  " go to this function:
-  function C()
-  endfunction
+   function A(args) abort
+     func B()
+       " from this line (3)
+     endfunction
+   endfunction  
+   " go to this function:
+   function C()
+   endfunction
 
 Include: smoke.test
 

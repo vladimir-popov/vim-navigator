@@ -35,7 +35,11 @@ g:navigator_close_nmap='<f12>'
 g:navigator_goto_nmap='<cr>'
 ```
 
-## Open mode
+## Configuration
+
+Navigator has some global useful options which described below.
+
+### Open mode
 
 Navigator has an option to show contents in different modes:
 

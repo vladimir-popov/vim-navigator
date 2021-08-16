@@ -1,3 +1,4 @@
+" =========================================================
 " Copyright 2021 Vladimir Popov <vladimir@dokwork.ru>
 " 
 " Permission is hereby granted, free of charge, to any person
@@ -21,6 +22,7 @@
 " OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 " OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 " SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+" ==========================================================
 
 
 

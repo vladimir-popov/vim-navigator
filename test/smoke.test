@@ -27,10 +27,15 @@
 " content is copied to the new buffer 'Main'
 " which explicitly become the current buffer.
 
+" Also, to avoid another issue with Vader in case of 
+" using comments in the Given blocks, you should add one more
+" space in the beginning of every lines. This space will be
+" removed in the current script.
+
 Execute:
   Log 'Prepare the main buffer'
   const file_type = &filetype
-  let content = getline(1, '$')
+  let content = map(getline(1, '$'), { k, v -> v[1:] })
   let main_bid = bufadd('Main')
   execute 'buffer ' .. main_bid
   call append(0, content)

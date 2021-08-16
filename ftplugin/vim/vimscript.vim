@@ -1,7 +1,7 @@
 setlocal foldmethod=expr
 setlocal foldexpr=NavigatorVimScript().foldLevel(v:lnum)
 
-function! g:NavigatorVimScript()
+function! g:NavigatorVimScript() abort
   if !exists('b:navigator') 
     let b:navigator = g:NavigatorNew()
     let b:navigator.parser.function = {
