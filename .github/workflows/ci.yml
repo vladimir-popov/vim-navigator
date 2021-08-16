@@ -21,4 +21,11 @@ jobs:
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
-      - run: vim -Nu ./test/vimrc.ci -c "Vader! ./test/render.vader"
+      - run: ls -a
+      - run: vim -EsNu <(cat << EOF
+             filetype off
+             set rtp+=.
+             set rtp+=vader.vim
+             filetype plugin indent on
+             syntax enable
+             ) -c "Vader! ./test/render.vader"
