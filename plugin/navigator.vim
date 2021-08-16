@@ -36,8 +36,6 @@ call navigator#utils#DefaultValue('g:navigator_show_nmap', '<f12>')
 call navigator#utils#DefaultValue('g:navigator_close_nmap', '<f12>')
 " Keymap to go to the selected section
 call navigator#utils#DefaultValue('g:navigator_goto_nmap', '<cr>')
-" Size of tabulation in the Contents
-call navigator#utils#DefaultValue('g:navigator_padding_size', 2)
 " Where the buffer with contents should be opened 
 call navigator#utils#DefaultValue('g:navigator_open_mode', 'r')
 
@@ -130,10 +128,6 @@ function! g:NavigatorNew() abort
     else
       return (g:navigator_open_mode ==# 'r') ? 'r' : 'b'
     endif
-  endfunction
-
-  function navigator.settings()
-    return { 'padding': g:navigator_padding_size }
   endfunction
 
   return navigator
