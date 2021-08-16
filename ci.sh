@@ -5,6 +5,10 @@ RED='\033[0;31m'
 NC='\033[0m' 
 
 function run() {
+}
+
+for test in ./test/*.vader
+do 
   nvim -EsNu <(cat << EOF
     filetype off
     set rtp+=.
@@ -21,11 +25,6 @@ function run() {
     VADER_RESULTS+=("$RED - FAIL: $1 $NC")
     RESULT=1
   fi
-}
-
-for test in ./test/*.vader
-do 
-    run $test &> /dev/null
 done
 
 printf '%b\n' "${VADER_RESULTS[@]}"
