@@ -1,0 +1,24 @@
+name: Vader Tests
+
+on:
+  push:
+    paths-ignore:
+      - 'doc/**'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - 'README.md'
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          name: junegunn/vader.vim
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+      - run: sh ./ci.sh
