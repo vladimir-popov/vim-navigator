@@ -22,5 +22,4 @@ jobs:
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
-      - run: ls -a
-      - run: vim -EsNu ./test/vimrc.ci -c "Vader! ./test/render.vader"
+      - run: ./test/ci.sh
