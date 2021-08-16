@@ -19,4 +19,4 @@ jobs:
         with:
           name: junegunn/vader.vim
       - uses: rhysd/action-setup-vim@v1
-      - run: sh ./test/ci.sh
+      - run: ./test/ci.sh
