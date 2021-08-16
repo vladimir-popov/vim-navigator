@@ -7,9 +7,11 @@ NC='\033[0m'
 VADER_RESULTS=("${GREEN}Results:$NC")
 RESULT=0
 
-for test in *.vader
+pwd
+
+for test in ./test/*.vader
 do 
-  vim -EsNu vimrc.ci -c "Vader! $test"
+  vim -EsNu ./test/vimrc.ci -c "Vader! $test"
 
   if [[ $? == 0 ]]
   then
