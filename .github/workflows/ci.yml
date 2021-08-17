@@ -15,11 +15,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
-        with:
-          repository: junegunn/vader.vim
-          path: vader.vim
       - uses: rhysd/action-setup-vim@v1
-        with:
-          neovim: true
-      - run: ./test/ci.sh
+      - run: ./test/run-tests.sh

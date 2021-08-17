@@ -1,23 +1,27 @@
 #!/usr/bin/env bash
 
 # =====================================================
-# To run this tests you should have the Vader plugin:
-# https://github.com/junegunn/vader.vim
+# This script is run Vader tests. You can specify 
+# particular test or run all *.vader from the ./test/
+# directory just ommiting particular test:
+#
+# > run-tests.sh utils.vader
+#
+# or to run all tests:
+#
+# > run-tests.sh
+#
+# Nevertheless, how you run tests, every 
+# test will be run in separate vim process.
+#
+# To run tests `vader.vim` needed. Two way to use 
+# `vader.vim` exist. The first one is set `VADER_PATH`.
+# By default `VADER_PATH` is '~/.vim/plugged/vader.vim/'.
+# If path from the `VADER_PATH` is absent, 
+# 'https://github.com/junegunn/vader.vim' will cloned 
+# to the temp directory which will be used as the 
+# `VADER_PATH`.
 # =====================================================
-
-
-# got to the directory with this script (./test/):
-cd $(dirname ${BASH_SOURCE[0]})
-
-# path to the Vader plugin:
-VADER_PATH=${VADER_PATH:='~/.vim/plugged/vader.vim/'}
-
-# path to the directory with plugin for test:
-PLUGIN_PATH=${PLUGIN_PATH:='../'}
-
-# regexp to select tests to run
-[[ -z "$1" ]] && VADER_TESTS=*.vader || VADER_TESTS="$1"
-
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -44,11 +48,31 @@ function run() {
   fi
 }
 
+function clone_vader() { 
+  VADER_PATH=$(mktemp -d)
+  echo 'Clone the vader.vim to the '$VADER_PATH
+  git clone --depth=1 'https://github.com/junegunn/vader.vim.git' "$VADER_PATH" 
+}  
+
+# got to the directory with this script (./test/):
+cd $(dirname ${BASH_SOURCE[0]})
+
+# path to the Vader plugin:
+VADER_PATH=${VADER_PATH:='~/.vim/plugged/vader.vim/'}
+
+[ -d $VADER_PATH ] && [ ! -L $VADER_PATH ] || clone_vader()
+
+# path to the directory with plugin for test:
+PLUGIN_PATH=${PLUGIN_PATH:='../'}
+
+# regexp to select tests to run
+[[ -z "$1" ]] && VADER_TESTS=*.vader || VADER_TESTS="$1"
+
 for test in $VADER_TESTS
 do 
   if [[ "$VADER_TESTS" == '*.vader' ]] 
   then
-    run $test &> /dev/null
+    run $test
   else
     run $test
   fi  
