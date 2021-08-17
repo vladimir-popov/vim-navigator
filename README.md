@@ -1,5 +1,7 @@
 # Vim Navigator
 
+[![Vader Tests](https://github.com/vladimir-popov/vim-navigator/actions/workflows/ci.yml/badge.svg)](https://github.com/vladimir-popov/vim-navigator/actions/workflows/ci.yml)
+
 The main goal of this plugin is to help you navigate around the buffer.  When
 the navigator for the current type of buffer exists, you can open the buffer's
 contents to go through it faster. Also, the same logic which is used to build
